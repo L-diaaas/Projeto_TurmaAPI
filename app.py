@@ -1,55 +1,61 @@
 from flask import Flask, jsonify, request
-import dici
+
+dici = {
+    'alunos': [
+        {
+            'id': 1,
+            'nome': 'João',
+            'idade': 20,
+            'turma_id': 101,
+            'data_nasc': '2005-05-15',
+            'nota_primeirosem': 7.5,
+            'nota_segundosem': 8.0,
+            'media_final': 7.75,
+        },
+    ]
+}
 
 app = Flask(__name__)
 
-@app.route('/alunos',methods=['POST'])
+@app.route('/alunos', methods=['POST'])
 def createAluno():
     dados = request.json
-    dici['alunos'].append(dados)
-    return jsonify(dados)
+    dici['alunos'].append(dados)  
+    return jsonify(dados), 201
 
 @app.route('/alunos', methods=["GET"])
 def getAlunos():
-    dados=dici['alunos']
+    dados = dici['alunos']
     return jsonify(dados)
 
 @app.route("/alunos/<int:idAluno>", methods=['GET'])
 def getAlunosID(idAluno):
-    alunos = dici["alunos"]
-    for aluno in alunos:
+    for aluno in dici["alunos"]:  
         if aluno['id'] == idAluno:
-            dados = request.json
-            return jsonify(dados)
-        else:
-            return jsonify("aluno nao encontrado")
+            return jsonify(aluno)  
+    return jsonify({"mensagem": "Aluno não encontrado"}), 404  
 
 @app.route("/alunos/<int:idAluno>", methods=['PUT'])
 def updateAlunos(idAluno):
-    alunos = dici["alunos"]
-    for aluno in alunos:
+    for aluno in dici["alunos"]:  
         if aluno['id'] == idAluno:
             dados = request.json
-            aluno["id"] = dados['id']
-            aluno['nome'] = dados['nome']
+            aluno.update(dados)  
+            return jsonify(aluno)  
+    return jsonify({"mensagem": "Aluno não encontrado"}), 404 
 
-            return jsonify(dados)
-        else:
-            return jsonify("aluno nao encontrado")
-
-
-@meuApp.route('/alunos', methods=['DELETE'])
+@app.route('/alunos', methods=['DELETE'])
 def delete_alunos():
-    return jsonify('mensagem': 'Todos os Alunos foram removidos.')
+    dici['alunos'].clear()  
+    return jsonify({'mensagem': 'Todos os Alunos foram removidos.'})
 
-
-@meuApp.route('/alunos/<int:idAluno>', methods=['DELETE'])
+@app.route('/alunos/<int:idAluno>', methods=['DELETE'])
 def delete_alunosID(idAluno):
-    for aluno in alunos:
+    for aluno in dici["alunos"]:  
         if aluno['id'] == idAluno:
-            alunos.remove(aluno)
+            dici['alunos'].remove(aluno)  
             return jsonify({'mensagem': 'Aluno removido'})
-    return jsonify({'mensagem': 'Aluno não encontrado'}), 404
+    return jsonify({'mensagem': 'Aluno não encontrado'}), 404  
 
-if __name__=="__main__":
+if __name__ == "__main__":
     app.run(debug=True)
